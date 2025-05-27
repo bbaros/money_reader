@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Box } from '@mui/material';
 import { EmailInputPage, EmailReaderPage } from './components';
 import { useEmailData } from './hooks/useEmailData';
-import { ParsedEmail } from './utils/types';
 
 const theme = createTheme({
     palette: {
@@ -52,7 +51,7 @@ function App() {
         setActiveFootnote
     } = useEmailData();
 
-    const handleEmailParsed = (email: ParsedEmail) => {
+    const handleEmailParsed = () => {
         setCurrentPage('reader');
     };
 

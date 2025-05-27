@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { ParsedEmail, EmailParserState } from '../utils/types';
+import { EmailParserState } from '../utils/types';
 import { parseMatthewLevineEmail, EmailParseError } from '../utils/emailParser';
 
 export const useEmailData = () => {

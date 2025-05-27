@@ -27,7 +27,7 @@ function convertHtmlToDisplayHtml(html: string): string {
     // Process footnote links: Convert Gmail footnote links to internal app links
     cleanHtml = cleanHtml.replace(
         /<a[^>]*href\s*=\s*["'][^"']*footnote[_-]?(\d+)["'][^>]*>(.*?)<\/a>/gi,
-        (match, footnoteNum, linkText) => {
+        (_match, footnoteNum, linkText) => {
             // Convert to internal footnote link that our app can handle
             return `<a href="#footnote-${footnoteNum}" class="footnote-link" data-footnote-id="${footnoteNum}">${linkText}</a>`;
         }
@@ -199,10 +199,10 @@ const extractGenericFootnotes = (footnotesSection: string): Footnote[] => {
 
     // Pattern 1: Matt Levine specific - <div id="m_2112239859843597646footnote-1" style="font-style: italic;">
     const mattLevineFootnoteRegex = /<div[^>]*id\s*=\s*["'][^"']*footnote-(\d+)["'][^>]*>(.*?)<\/div>/gis;
-    let match;
-    while ((match = mattLevineFootnoteRegex.exec(footnotesSection)) !== null) {
-        const id = parseInt(match[1], 10);
-        const htmlContent = match[2];
+    let currentMatch;
+    while ((currentMatch = mattLevineFootnoteRegex.exec(footnotesSection)) !== null) {
+        const id = parseInt(currentMatch[1], 10);
+        const htmlContent = currentMatch[2];
         const content = stripHtmlTags(htmlContent).trim();
 
         if (content.length > 0) {
@@ -217,9 +217,9 @@ const extractGenericFootnotes = (footnotesSection: string): Footnote[] => {
     // Pattern 2: Alternative Matt Levine pattern - without the hyphen
     if (footnotes.length === 0) {
         const altMattLevineRegex = /<div[^>]*id\s*=\s*["'][^"']*footnote(\d+)["'][^>]*>(.*?)<\/div>/gis;
-        while ((match = altMattLevineRegex.exec(footnotesSection)) !== null) {
-            const id = parseInt(match[1], 10);
-            const htmlContent = match[2];
+        while ((currentMatch = altMattLevineRegex.exec(footnotesSection)) !== null) {
+            const id = parseInt(currentMatch[1], 10);
+            const htmlContent = currentMatch[2];
             const content = stripHtmlTags(htmlContent).trim();
 
             if (content.length > 0) {
@@ -235,16 +235,16 @@ const extractGenericFootnotes = (footnotesSection: string): Footnote[] => {
     // Pattern 3: Generic HTML footnotes with IDs like <p id="footnote1">
     if (footnotes.length === 0) {
         const htmlFootnoteRegex = /<p[^>]*id\s*=\s*["']?footnote(\d+)["']?[^>]*>(.*?)<\/p>/gis;
-        while ((match = htmlFootnoteRegex.exec(footnotesSection)) !== null) {
-            const id = parseInt(match[1], 10);
-            const htmlContent = match[2];
+        while ((currentMatch = htmlFootnoteRegex.exec(footnotesSection)) !== null) {
+            const id = parseInt(currentMatch[1], 10);
+            const htmlContent = currentMatch[2];
             const content = stripHtmlTags(htmlContent).trim();
 
             if (content.length > 0) {
                 footnotes.push({
                     id,
                     content,
-                    originalHtml: match[0]
+                    originalHtml: currentMatch[0]
                 });
             }
         }
@@ -253,16 +253,16 @@ const extractGenericFootnotes = (footnotesSection: string): Footnote[] => {
     // Pattern 4: Simple numbered paragraphs like <p><sup>1</sup> content</p>
     if (footnotes.length === 0) {
         const supFootnoteRegex = /<p[^>]*><sup>(\d+)<\/sup>\s*(.*?)<\/p>/gis;
-        while ((match = supFootnoteRegex.exec(footnotesSection)) !== null) {
-            const id = parseInt(match[1], 10);
-            const htmlContent = match[2];
+        while ((currentMatch = supFootnoteRegex.exec(footnotesSection)) !== null) {
+            const id = parseInt(currentMatch[1], 10);
+            const htmlContent = currentMatch[2];
             const content = stripHtmlTags(htmlContent).trim();
 
             if (content.length > 0) {
                 footnotes.push({
                     id,
                     content,
-                    originalHtml: match[0]
+                    originalHtml: currentMatch[0]
                 });
             }
         }
@@ -284,10 +284,10 @@ const extractFootnotes = (footnotesSection: string, isHtml: boolean): Footnote[]
         // Pattern 1: Matt Levine specific - Look for the exact pattern from real emails
         // <div id="m_2112239859843597646footnote-1" style="font-style: italic;">
         const mattLevineFootnoteRegex = /<div[^>]*id\s*=\s*["'][^"']*footnote-(\d+)["'][^>]*>(.*?)<\/div>/gis;
-        let match;
-        while ((match = mattLevineFootnoteRegex.exec(footnotesSection)) !== null) {
-            const id = parseInt(match[1], 10);
-            const htmlContent = match[2];
+        let currentMatch;
+        while ((currentMatch = mattLevineFootnoteRegex.exec(footnotesSection)) !== null) {
+            const id = parseInt(currentMatch[1], 10);
+            const htmlContent = currentMatch[2];
             const content = stripHtmlTags(htmlContent).trim();
 
             if (content.length > 0) {
@@ -302,9 +302,9 @@ const extractFootnotes = (footnotesSection: string, isHtml: boolean): Footnote[]
         // Pattern 2: Alternative Matt Levine pattern - without the hyphen
         if (footnotes.length === 0) {
             const altMattLevineRegex = /<div[^>]*id\s*=\s*["'][^"']*footnote(\d+)["'][^>]*>(.*?)<\/div>/gis;
-            while ((match = altMattLevineRegex.exec(footnotesSection)) !== null) {
-                const id = parseInt(match[1], 10);
-                const htmlContent = match[2];
+            while ((currentMatch = altMattLevineRegex.exec(footnotesSection)) !== null) {
+                const id = parseInt(currentMatch[1], 10);
+                const htmlContent = currentMatch[2];
                 const content = stripHtmlTags(htmlContent).trim();
 
                 if (content.length > 0) {
@@ -320,16 +320,16 @@ const extractFootnotes = (footnotesSection: string, isHtml: boolean): Footnote[]
         // Pattern 3: Generic HTML footnotes with IDs like <div id="footnote-1">
         if (footnotes.length === 0) {
             const htmlFootnoteRegex = /<[^>]*id\s*=\s*["']?[^"']*footnote[^"']*(\d+)[^"']*["']?[^>]*>(.*?)<\/[^>]+>/gis;
-            while ((match = htmlFootnoteRegex.exec(footnotesSection)) !== null) {
-                const id = parseInt(match[1], 10);
-                const htmlContent = match[2];
+            while ((currentMatch = htmlFootnoteRegex.exec(footnotesSection)) !== null) {
+                const id = parseInt(currentMatch[1], 10);
+                const htmlContent = currentMatch[2];
                 const content = stripHtmlTags(htmlContent).trim();
 
                 if (content.length > 0) {
                     footnotes.push({
                         id,
                         content,
-                        originalHtml: match[0]
+                        originalHtml: currentMatch[0]
                     });
                 }
             }
@@ -338,15 +338,15 @@ const extractFootnotes = (footnotesSection: string, isHtml: boolean): Footnote[]
         // Pattern 4: Text-based footnotes in HTML content
         if (footnotes.length === 0) {
             const footnoteRegex = /\[(\d+)\]\s*(.*?)(?=\[\d+\]|$)/gs;
-            while ((match = footnoteRegex.exec(textContent)) !== null) {
-                const id = parseInt(match[1], 10);
-                const content = match[2].trim();
+            while ((currentMatch = footnoteRegex.exec(textContent)) !== null) {
+                const id = parseInt(currentMatch[1], 10);
+                const content = currentMatch[2].trim();
 
                 if (content.length > 0) {
                     footnotes.push({
                         id,
                         content,
-                        originalHtml: match[0]
+                        originalHtml: currentMatch[0]
                     });
                 }
             }
@@ -354,16 +354,16 @@ const extractFootnotes = (footnotesSection: string, isHtml: boolean): Footnote[]
     } else {
         // For plain text, use the original logic
         const footnoteRegex = /^\[(\d+)\]\s*(.*?)(?=^\[\d+\]|\s*$)/gms;
-        let match;
-        while ((match = footnoteRegex.exec(footnotesSection)) !== null) {
-            const id = parseInt(match[1], 10);
-            const content = match[2].trim();
+        let currentMatch;
+        while ((currentMatch = footnoteRegex.exec(footnotesSection)) !== null) {
+            const id = parseInt(currentMatch[1], 10);
+            const content = currentMatch[2].trim();
 
             if (content.length > 0) {
                 footnotes.push({
                     id,
                     content,
-                    originalHtml: match[0]
+                    originalHtml: currentMatch[0]
                 });
             }
         }
@@ -379,9 +379,9 @@ export const findFootnoteReferences = (content: string): number[] => {
     const referenceRegex = /\[(\d+)\]/g;
     const references: number[] = [];
 
-    let match;
-    while ((match = referenceRegex.exec(content)) !== null) {
-        const id = parseInt(match[1], 10);
+    let currentMatch;
+    while ((currentMatch = referenceRegex.exec(content)) !== null) {
+        const id = parseInt(currentMatch[1], 10);
         if (!references.includes(id)) {
             references.push(id);
         }
@@ -391,8 +391,7 @@ export const findFootnoteReferences = (content: string): number[] => {
 };
 
 export const highlightFootnoteReferences = (
-    content: string,
-    onReferenceClick: (footnoteId: number) => void
+    content: string
 ): string => {
     // This function will be used to replace footnote references with clickable elements
     // We'll implement the actual highlighting in the React component
