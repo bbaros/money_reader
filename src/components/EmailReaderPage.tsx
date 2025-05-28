@@ -1,6 +1,7 @@
 import React from 'react';
 import { Container, Box, Button, Typography, Divider } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { ParsedEmail } from '../utils/types';
 import EmailMainContent from './EmailMainContent';
 import FootnotesPanel from './FootnotesPanel';
@@ -65,27 +66,26 @@ const EmailReaderPage: React.FC<EmailReaderPageProps> = ({
                     sx={{
                         flex: 1,
                         display: 'flex',
-                        flexDirection: { xs: 'column', md: 'column' },
-                        gap: 2,
+                        flexDirection: 'column', // PanelGroup handles vertical layout
                         overflow: 'hidden'
                     }}
                 >
-                    {/* Main content pane - 60% height */}
-                    <Box sx={{ height: { xs: '50%', md: '60%' }, minHeight: '300px' }}>
-                        <EmailMainContent
-                            parsedEmail={parsedEmail}
-                            onFootnoteClick={onFootnoteClick}
-                            activeFootnoteId={activeFootnoteId}
-                        />
-                    </Box>
-
-                    {/* Footnotes pane - 40% height */}
-                    <Box sx={{ height: { xs: '50%', md: '40%' }, minHeight: '200px' }}>
-                        <FootnotesPanel
-                            footnotes={parsedEmail.footnotes}
-                            activeFootnoteId={activeFootnoteId}
-                        />
-                    </Box>
+                    <PanelGroup direction="vertical" style={{ flex: 1, overflow: 'hidden' }}>
+                        <Panel defaultSizePercentage={60} minSizePixels={300}>
+                            <EmailMainContent
+                                parsedEmail={parsedEmail}
+                                onFootnoteClick={onFootnoteClick}
+                                activeFootnoteId={activeFootnoteId}
+                            />
+                        </Panel>
+                        <PanelResizeHandle style={{ height: '4px', backgroundColor: '#e0e0e0' }} />
+                        <Panel defaultSizePercentage={40} minSizePixels={200}>
+                            <FootnotesPanel
+                                footnotes={parsedEmail.footnotes}
+                                activeFootnoteId={activeFootnoteId}
+                            />
+                        </Panel>
+                    </PanelGroup>
                 </Box>
             </Box>
         </Container>
