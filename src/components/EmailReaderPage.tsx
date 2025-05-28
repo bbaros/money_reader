@@ -71,7 +71,7 @@ const EmailReaderPage: React.FC<EmailReaderPageProps> = ({
                     }}
                 >
                     <PanelGroup direction="vertical" style={{ flex: 1, overflow: 'hidden' }}>
-                        <Panel defaultSizePercentage={60} minSizePixels={300}>
+                        <Panel defaultSize={60} minSize={20}>
                             <EmailMainContent
                                 parsedEmail={parsedEmail}
                                 onFootnoteClick={onFootnoteClick}
@@ -79,7 +79,7 @@ const EmailReaderPage: React.FC<EmailReaderPageProps> = ({
                             />
                         </Panel>
                         <PanelResizeHandle style={{ height: '4px', backgroundColor: '#e0e0e0' }} />
-                        <Panel defaultSizePercentage={40} minSizePixels={200}>
+                        <Panel defaultSize={40} minSize={10}>
                             <FootnotesPanel
                                 footnotes={parsedEmail.footnotes}
                                 activeFootnoteId={activeFootnoteId}
