@@ -1,4 +1,4 @@
-# Matt Levine Email Reader
+# Matt Levine Money Stuff Email Reader
 
 A React application that helps users read Matt Levine's "Money Stuff" emails by providing a two-pane layout with main content on top and footnotes on the bottom, both scrollable independently.
 
@@ -67,13 +67,13 @@ To get a local copy up and running, follow these simple steps.
 
 1.  **Clone the repository:**
     ```sh
-    git clone https://github.com/your-username/mattreader.git
+    git clone https://github.com/your-username/money_reader
     ```
     (Replace `your-username` with the actual username or organization if this is a remote repository. If it's local, you might skip this or adjust.)
 
 2.  **Navigate to the project directory:**
     ```sh
-    cd mattreader
+    cd money_reader
     ```
 
 3.  **Install NPM packages:**
@@ -117,13 +117,13 @@ Here are a couple of ways to serve the `dist` directory locally for testing:
 2.  **Opening `dist/index.html` directly in a browser:**
     You can also open the `dist/index.html` file directly in your web browser.
     ```
-    file:///path/to/your/project/mattreader/dist/index.html
+    file:///path/to/your/project/money_reader/dist/index.html
     ```
     Note: While this works for simple cases, some browser features or routing configurations might not work as expected when opened via the `file://` protocol. Using a local HTTP server (like `npx serve`) is generally recommended for a more accurate testing environment.
 
 The `dist` directory can be uploaded to services like GitHub Pages, Netlify, Vercel, AWS S3, or any other static hosting provider.
 
-**Note for GitHub Pages Deployment:** The `vite.config.ts` is configured with `base: '/matt_reader/'` to ensure correct asset loading when deployed to GitHub Pages under a repository named `matt_reader`. If deploying to a different path or platform, this configuration might need adjustment.
+**Note for GitHub Pages Deployment:** The `vite.config.ts` is configured with `base: '/money_reader/'` to ensure correct asset loading when deployed to GitHub Pages under a repository named `money_reader`. If deploying to a different path or platform, this configuration might need adjustment.
 
 ### Automated Deployment
 

@@ -43,7 +43,7 @@ const EmailReaderPage: React.FC<EmailReaderPageProps> = ({
                         </Button>
 
                         <Typography variant="h5" component="h1" sx={{ color: 'primary.main' }}>
-                            Matt Reader
+                            Moeny Stuff Reader
                         </Typography>
                     </Box>
 
