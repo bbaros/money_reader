@@ -53,7 +53,7 @@ const EmailInputPage: React.FC<EmailInputPageProps> = ({
                 <Box display="flex" alignItems="center" mb={3}>
                     <Email sx={{ mr: 2, fontSize: 32, color: 'primary.main' }} />
                     <Typography variant="h4" component="h1" color="primary">
-                        Matt Reader
+                        Money Stuff Reader
                     </Typography>
                 </Box>
 
@@ -99,7 +99,7 @@ const EmailInputPage: React.FC<EmailInputPageProps> = ({
                     fullWidth
                     multiline
                     rows={12}
-                    placeholder="Paste your Matt Levine email content here..."
+                    placeholder="Paste your Matt Levine Moeny Stuff email here..."
                     value={emailContent}
                     onChange={(e) => setEmailContent(e.target.value)}
                     onPaste={(e) => {
