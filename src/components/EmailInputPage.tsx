@@ -58,7 +58,8 @@ const EmailInputPage: React.FC<EmailInputPageProps> = ({
                         pb: 1
                     }}
                 >
-                    <Typography variant="h5" component="h1" sx={{ color: 'primary.main' }}>
+                    <Email sx={{ mr: 2, fontSize: 32, color: 'primary.main' }} />
+                    <Typography variant="h4" component="h1" sx={{ color: 'primary.main' }}>
                         Money Stuff Reader
                     </Typography>
                     <Typography
