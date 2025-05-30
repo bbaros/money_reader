@@ -45,6 +45,21 @@ const EmailReaderPage: React.FC<EmailReaderPageProps> = ({
                         <Typography variant="h5" component="h1" sx={{ color: 'primary.main' }}>
                             Money Stuff Reader
                         </Typography>
+                        <Typography
+                            variant="caption"
+                            sx={{ color: 'text.secondary', ml: 1 }}
+                            component="span"
+                        >
+                            by{' '}
+                            <a
+                                href="https://bojanbaros.com"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 500 }}
+                            >
+                                Bojan Baros
+                            </a>
+                        </Typography>
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
