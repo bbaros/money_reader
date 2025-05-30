@@ -92,7 +92,7 @@ const FootnotesPanel: React.FC<FootnotesPanelProps> = ({
                                         mb: 1,
                                         transition: 'all 0.3s ease',
                                         border: activeFootnoteId === footnote.id
-                                            ? 2
+                                            ? 1
                                             : 1,
                                         borderColor: activeFootnoteId === footnote.id
                                             ? 'primary.main'
@@ -127,6 +127,7 @@ const FootnotesPanel: React.FC<FootnotesPanelProps> = ({
                                         sx={{
                                             lineHeight: 1.6,
                                             whiteSpace: 'pre-wrap',
+                                            fontWeight: activeFootnoteId === footnote.id ? 'bold' : 'normal',
                                             wordBreak: 'break-word'
                                         }}
                                     >
