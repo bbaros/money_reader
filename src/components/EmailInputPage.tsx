@@ -99,7 +99,7 @@ const EmailInputPage: React.FC<EmailInputPageProps> = ({
                     fullWidth
                     multiline
                     rows={12}
-                    placeholder="Paste your Matt Levine Moeny Stuff email here..."
+                    placeholder="Paste your Matt Levine Money Stuff email here..."
                     value={emailContent}
                     onChange={(e) => setEmailContent(e.target.value)}
                     onPaste={(e) => {
