@@ -39,10 +39,10 @@ const EmailReaderPage: React.FC<EmailReaderPageProps> = ({
                         variant="outlined"
                         sx={{ mr: 3 }}
                     >
-                        Back to Input
+                        Back
                     </Button>
 
-                    <Typography variant="h5" component="h1" sx={{ color: 'primary.main' }}>
+                    <Typography variant="h6" component="h1" sx={{ color: 'primary.main' }}>
                         Money Stuff Reader
                     </Typography>
                     <Typography
