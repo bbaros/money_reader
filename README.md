@@ -1,21 +1,18 @@
 # Matt Levine Money Stuff Email Reader
 
-A React application that helps users read Matt Levine's "Money Stuff" emails by providing a two-pane layout with main content on top and footnotes on the bottom, both scrollable independently.
+A React application that helps users read Matt Levine's "Money Stuff" emails by providing main content with pop-over footnotes.
 
 ## How to Use
 
 1.  **Paste Email HTML**: Open the application. You will see a text area where you can paste the raw HTML content of a Matt Levine "Money Stuff" email.
 2.  **Parse Email**: Click the "Parse Email" button. The application will process the HTML.
-3.  **Read with Two-Pane View**: The application will display the email in a two-pane layout:
-    *   The main content of the email appears in the top pane.
-    *   Footnotes appear in the bottom pane.
-    *   Both panes are independently scrollable.
-4.  **Interactive Footnotes**: Click on a footnote reference (e.g., `[1]`) in the main content. The corresponding footnote will be automatically scrolled into view and highlighted in the bottom pane.
+3.  **Read with Pop-over Footnotes**: The application will display the email content.
+4.  **Interactive Footnotes**: Click on a footnote reference (e.g., `[1]`) in the main content. The corresponding footnote will appear in a pop-over.
 
 ## Features
 
-*   **Two-Pane Layout**: Displays email content and footnotes in separate, independently scrollable panes for easy reading.
-*   **Interactive Footnote System**: Clickable footnote references in the main text navigate directly to the corresponding footnote, which is then highlighted.
+*   **Pop-over Footnotes**: Displays footnotes in a pop-over when the corresponding reference in the main text is clicked.
+*   **Interactive Footnote System**: Clickable footnote references in the main text trigger a pop-over displaying the corresponding footnote content.
 *   **HTML Parsing**: Parses raw HTML from Matt Levine's "Money Stuff" emails to extract main content and footnotes.
 *   **Responsive Design**: Adapts to different screen sizes, stacking panes vertically on mobile devices for optimal viewing.
 *   **MUI Components**: Utilizes Material-UI for a clean and modern user interface.
@@ -153,6 +150,6 @@ For manual testing of the user interface and overall application flow:
     ```
 2.  Open the application in your browser.
 3.  Use sample email HTML (e.g., from `tests/test_email.html` or the examples in `tests/test_parser.js`) to paste into the input field.
-4.  Verify that the email parses correctly, the two-pane layout works as expected, and footnote interactions (clicking, scrolling, highlighting) are functional.
+4.  Verify that the email parses correctly and that clicking on footnote references opens a pop-over with the correct footnote content.
 
 For more detailed testing information, including specific checks and how to use the browser console for tests, please refer to the `tests/README.md` file.
