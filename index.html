@@ -6,6 +6,23 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Money Stuff Email Reader</title>
+    <script>
+        // Minimal MUI InitColorSchemeScript logic to prefer light mode initially
+        // and avoid flicker if localStorage is later used for user preference.
+        (function () {
+            try {
+                var mode = localStorage.getItem('mui-mode');
+                if (mode) {
+                    document.documentElement.setAttribute('data-mui-color-scheme', mode);
+                } else {
+                    // Default to light mode if no preference is stored
+                    document.documentElement.setAttribute('data-mui-color-scheme', 'light');
+                }
+            } catch (e) {
+                // Ignore errors, e.g. if localStorage is disabled
+            }
+        })();
+    </script>
 </head>
 
 <body>
