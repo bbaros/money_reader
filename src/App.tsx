@@ -1,20 +1,49 @@
-import { useState } from 'react';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CssBaseline, Box } from '@mui/material';
+import React, { useState, useMemo } from 'react';
+import { ThemeProvider, createTheme, PaletteMode } from '@mui/material/styles';
+import { CssBaseline, Box, IconButton } from '@mui/material';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { EmailInputPage, EmailReaderPage } from './components';
 import { useEmailData } from './hooks/useEmailData';
 
-const theme = createTheme({
+const getDesignTokens = (mode: PaletteMode) => ({
     palette: {
-        primary: {
-            main: '#1976d2',
-        },
-        secondary: {
-            main: '#dc004e',
-        },
-        background: {
-            default: '#f5f5f5',
-        },
+        mode,
+        ...(mode === 'light'
+            ? {
+                // palette values for light mode
+                primary: {
+                    main: '#1976d2',
+                },
+                secondary: {
+                    main: '#dc004e',
+                },
+                background: {
+                    default: '#f5f5f5',
+                    paper: '#ffffff',
+                },
+                text: {
+                    primary: '#000000',
+                    secondary: '#5f6368',
+                }
+            }
+            : {
+                // palette values for dark mode
+                primary: {
+                    main: '#90caf9', // A lighter blue for dark mode
+                },
+                secondary: {
+                    main: '#f48fb1', // A lighter pink for dark mode
+                },
+                background: {
+                    default: '#121212',
+                    paper: '#1e1e1e', // Slightly lighter than default for paper elements
+                },
+                text: {
+                    primary: '#ffffff',
+                    secondary: '#aaaaaa',
+                }
+            }),
     },
     typography: {
         fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
@@ -39,7 +68,20 @@ const theme = createTheme({
     },
 });
 
+
 function App() {
+    const [mode, setMode] = useState<PaletteMode>('light');
+    const colorMode = useMemo(
+        () => ({
+            toggleColorMode: () => {
+                setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
+            },
+        }),
+        [],
+    );
+
+    const theme = useMemo(() => createTheme(getDesignTokens(mode)), [mode]);
+
     const [currentPage, setCurrentPage] = useState<'input' | 'reader'>('input');
     const {
         parsedEmail,
@@ -92,10 +134,22 @@ function App() {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
-            <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
-                {currentPage === 'input' ? (
-                    <EmailInputPage
-                        onEmailParsed={handleEmailParsed}
+            <Box sx={{
+                minHeight: '100vh',
+                backgroundColor: 'background.default',
+                color: 'text.primary', // Ensure text color contrasts with background
+                display: 'flex',
+                flexDirection: 'column'
+            }}>
+                <Box sx={{ alignSelf: 'flex-end', p: 1 }}>
+                    <IconButton sx={{ ml: 1 }} onClick={colorMode.toggleColorMode} color="inherit">
+                        {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+                    </IconButton>
+                </Box>
+                <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                    {currentPage === 'input' ? (
+                        <EmailInputPage
+                            onEmailParsed={handleEmailParsed}
                         isLoading={isLoading}
                         error={error}
                         onParseEmail={parseEmail}
