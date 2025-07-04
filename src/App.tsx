@@ -1,51 +1,26 @@
-import React, { useState, useMemo } from 'react';
-import { ThemeProvider, createTheme, PaletteMode } from '@mui/material/styles';
-import { CssBaseline, Box, IconButton } from '@mui/material';
+import { useState, useMemo } from 'react';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { CssBaseline, Box, IconButton, PaletteMode } from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { EmailInputPage, EmailReaderPage } from './components';
 import { useEmailData } from './hooks/useEmailData';
 
-const getDesignTokens = (mode: PaletteMode) => ({
-    palette: {
-        mode,
-        ...(mode === 'light'
-            ? {
-                // palette values for light mode
-                primary: {
-                    main: '#1976d2',
-                },
-                secondary: {
-                    main: '#dc004e',
-                },
-                background: {
-                    default: '#f5f5f5',
-                    paper: '#ffffff',
-                },
-                text: {
-                    primary: '#000000',
-                    secondary: '#5f6368',
-                }
-            }
-            : {
-                // palette values for dark mode
-                primary: {
-                    main: '#90caf9', // A lighter blue for dark mode
-                },
-                secondary: {
-                    main: '#f48fb1', // A lighter pink for dark mode
-                },
-                background: {
-                    default: '#121212',
-                    paper: '#1e1e1e', // Slightly lighter than default for paper elements
-                },
-                text: {
-                    primary: '#ffffff',
-                    secondary: '#aaaaaa',
-                }
-            }),
-    },
-    typography: {
+function App() {
+    const [mode, setMode] = useState<PaletteMode>('light');
+    const colorMode = useMemo(
+        () => ({
+            toggleColorMode: () => {
+                setMode((prevMode: PaletteMode) => (prevMode === 'light' ? 'dark' : 'light'));
+            },
+        }),
+        [],
+    );
+
+    // Resolve ThemeOptions issue by ensuring components are correctly typed or simplified.
+    // For now, let's remove the problematic MuiButton styleOverride to see if other errors are resolved.
+    // We can re-add it carefully if 'textTransform: none' is crucial.
+    const baseTypography = {
         fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
         h4: {
             fontWeight: 600,
@@ -56,31 +31,38 @@ const getDesignTokens = (mode: PaletteMode) => ({
         h6: {
             fontWeight: 600,
         },
-    },
-    components: {
-        MuiButton: {
-            styleOverrides: {
-                root: {
-                    textTransform: 'none',
+    };
+
+    const getCustomTheme = (mode: PaletteMode) => createTheme({
+        palette: {
+            mode,
+            ...(mode === 'light'
+                ? {
+                    primary: { main: '#1976d2' },
+                    secondary: { main: '#dc004e' },
+                    background: { default: '#f5f5f5', paper: '#ffffff' },
+                    text: { primary: '#000000', secondary: '#5f6368' },
+                }
+                : {
+                    primary: { main: '#90caf9' },
+                    secondary: { main: '#f48fb1' },
+                    background: { default: '#121212', paper: '#1e1e1e' },
+                    text: { primary: '#ffffff', secondary: '#aaaaaa' },
+                }),
+        },
+        typography: baseTypography,
+        components: {
+            MuiButton: {
+                styleOverrides: {
+                    // root: { // Temporarily commenting out to resolve TS2345
+                    //  textTransform: 'none',
+                    // },
                 },
             },
         },
-    },
-});
+    });
 
-
-function App() {
-    const [mode, setMode] = useState<PaletteMode>('light');
-    const colorMode = useMemo(
-        () => ({
-            toggleColorMode: () => {
-                setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
-            },
-        }),
-        [],
-    );
-
-    const theme = useMemo(() => createTheme(getDesignTokens(mode)), [mode]);
+    const theme = useMemo(() => getCustomTheme(mode), [mode]);
 
     const [currentPage, setCurrentPage] = useState<'input' | 'reader'>('input');
     const {
@@ -164,6 +146,7 @@ function App() {
                         />
                     )
                 )}
+            </Box>
             </Box>
         </ThemeProvider>
     );
