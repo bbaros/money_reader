@@ -1,8 +1,10 @@
 import { useState, useMemo } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CssBaseline, Box, IconButton, PaletteMode } from '@mui/material';
+import { CssBaseline, Box, IconButton, PaletteMode, Typography, Button } from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
+import EmailIcon from '@mui/icons-material/Email';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { EmailInputPage, EmailReaderPage } from './components';
 import { useEmailData } from './hooks/useEmailData';
 
@@ -121,16 +123,73 @@ function App() {
                 backgroundColor: 'background.default',
                 color: 'text.primary', // Ensure text color contrasts with background
                 display: 'flex',
-                flexDirection: 'column'
+                flexDirection: 'column',
+                alignItems: 'center', // Center the main content panel
             }}>
-                <Box sx={{ alignSelf: 'flex-end', p: 1 }}>
-                    <IconButton sx={{ ml: 1 }} onClick={colorMode.toggleColorMode} color="inherit">
-                        {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-                    </IconButton>
-                </Box>
-                <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                    {currentPage === 'input' ? (
-                        <EmailInputPage
+                {/* Main content panel */}
+                <Box sx={{
+                    flexGrow: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    width: '100%', // Ensure the panel takes full width for centering content
+                    maxWidth: '960px', // Max width for the content area
+                    // p: 2, // Padding will be handled by header and content sections
+                    position: 'relative', // Keep for potential future absolute elements if needed
+                }}>
+                    {/* Shared Header for title and theme toggle */}
+                    <Box sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        p: 2, // Padding for the header
+                        borderBottom: `1px solid ${theme.palette.divider}`, // Optional: adds a separator line
+                        width: '100%',
+                    }}>
+                        <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
+                            {currentPage === 'input' ? (
+                                <>
+                                    <EmailIcon sx={{ mr: 2, fontSize: 32, color: 'primary.main' }} />
+                                    <Typography variant="h4" component="h1" sx={{ color: 'primary.main' }}>
+                                        Money Stuff Reader
+                                    </Typography>
+                                    <Typography variant="caption" sx={{ color: 'text.secondary', ml: 1 }} component="span">
+                                        by{' '}
+                                        <a href="https://bojanbaros.com" target="_blank" rel="noopener noreferrer" style={{ color: theme.palette.mode === 'light' ? '#1976d2' : '#90caf9', textDecoration: 'none', fontWeight: 500 }}>
+                                            Bojan Baros
+                                        </a>
+                                    </Typography>
+                                </>
+                            ) : (
+                                <>
+                                    <Button startIcon={<ArrowBackIcon />} onClick={handleBackToInput} variant="outlined" sx={{ mr: 2 }}>
+                                        Back
+                                    </Button>
+                                    <Typography variant="h6" component="h1" sx={{ color: 'primary.main', mr: 1 }}>
+                                        Money Stuff Reader
+                                    </Typography>
+                                    <Typography variant="caption" sx={{ color: 'text.secondary', ml: 0.5, mr:2 }} component="span">
+                                        by{' '}
+                                        <a href="https://bojanbaros.com" target="_blank" rel="noopener noreferrer" style={{ color: theme.palette.mode === 'light' ? '#1976d2' : '#90caf9', textDecoration: 'none', fontWeight: 500 }}>
+                                            Bojan Baros
+                                        </a>
+                                    </Typography>
+                                    {parsedEmail && (
+                                        <Typography variant="body2" color="text.secondary">
+                                            {parsedEmail.footnotes.length} footnotes
+                                        </Typography>
+                                    )}
+                                </>
+                            )}
+                        </Box>
+                        <IconButton sx={{ ml: 1 }} onClick={colorMode.toggleColorMode} color="inherit">
+                            {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+                        </IconButton>
+                    </Box>
+
+                    {/* Content Area */}
+                    <Box sx={{ p: 2, width: '100%' }}>
+                        {currentPage === 'input' ? (
+                            <EmailInputPage
                             onEmailParsed={handleEmailParsed}
                         isLoading={isLoading}
                         error={error}
@@ -142,12 +201,13 @@ function App() {
                             parsedEmail={parsedEmail}
                             activeFootnoteId={activeFootnoteId}
                             onFootnoteClick={handleFootnoteClick}
-                            onBackToInput={handleBackToInput}
+                            // onBackToInput={handleBackToInput} // Removed prop
                         />
                     )
                 )}
-            </Box>
-            </Box>
+            </Box> {/* Closes Content Area */}
+            </Box> {/* Closes Main content panel */}
+            </Box> {/* Closes Outer App Box (the one with minHeight: '100vh') */}
         </ThemeProvider>
     );
 }
