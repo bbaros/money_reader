@@ -1,6 +1,6 @@
 import React from 'react';
-import { Container, Box, Button, Typography, Divider } from '@mui/material';
-import { ArrowBack } from '@mui/icons-material';
+import { Container, Box, Typography } from '@mui/material'; // Removed Button, Divider
+// import { ArrowBack } from '@mui/icons-material'; // Removed ArrowBack
 // import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels"; // Removed
 import { ParsedEmail } from '../utils/types';
 import EmailMainContent from './EmailMainContent';
@@ -10,74 +10,28 @@ interface EmailReaderPageProps {
     parsedEmail: ParsedEmail;
     activeFootnoteId: number | null;
     onFootnoteClick: (footnoteId: number, currentTarget: HTMLElement | null) => void; // Signature updated
-    onBackToInput: () => void;
+    // onBackToInput: () => void; // Removed onBackToInput from props
 }
 
 const EmailReaderPage: React.FC<EmailReaderPageProps> = ({
     parsedEmail,
     activeFootnoteId,
-    onFootnoteClick,
-    onBackToInput
+    onFootnoteClick
+    // onBackToInput // Removed from destructuring
 }) => {
     return (
-        <Container maxWidth="xl" sx={{ height: '100vh', py: 2, display: 'flex', flexDirection: 'column' }}>
-            {/* Header */}
-            <Box
-                sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    mb: 2,
-                    pb: 1,
-                    flexShrink: 0, // Prevent header from shrinking
-                }}
-            >
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Button
-                        startIcon={<ArrowBack />}
-                        onClick={onBackToInput}
-                        variant="outlined"
-                        sx={{ mr: 3 }}
-                    >
-                        Back
-                    </Button>
+        // The main Container's padding `py: 2` might be redundant due to App.tsx's header/content padding.
+        // Setting pt: 0 to avoid double padding at the top.
+        <Container maxWidth="xl" sx={{ height: '100vh', pt: 0, pb: 2, display: 'flex', flexDirection: 'column' }}>
+            {/* Header (Back button, Title, Byline, Footnote count) has been moved to App.tsx */}
+            {/* Divider has been moved to App.tsx (as borderBottom on the header Box) */}
 
-                    <Typography variant="h6" component="h1" sx={{ color: 'primary.main' }}>
-                        Money Stuff Reader
-                    </Typography>
-                    <Typography
-                        variant="caption"
-                        sx={{ color: 'text.secondary', ml: 1 }}
-                        component="span"
-                    >
-                        by{' '}
-                        <a
-                            href="https://bojanbaros.com"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 500 }}
-                        >
-                            Bojan Baros
-                        </a>
-                    </Typography>
-                </Box>
-
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Typography variant="body2" color="text.secondary">
-                        {parsedEmail.footnotes.length} footnotes found
-                    </Typography>
-                    {/* The "Viewing footnote [id]" can be removed or kept if desired,
-                        but the popover itself will show the active footnote.
-                        Keeping it for now as it provides some context in the header. */}
-                    {activeFootnoteId && (
-                        <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
-                            Viewing footnote [{activeFootnoteId}]
-                        </Typography>
-                    )}
-                </Box>
-            </Box>
-
-            <Divider sx={{ mb: 2, flexShrink: 0 }} />
+            {/* Active footnote indicator can remain here or be moved if preferred */}
+            {activeFootnoteId && (
+                <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 'bold', textAlign: 'right', pb:1 }}>
+                    Viewing footnote [{activeFootnoteId}]
+                </Typography>
+            )}
 
             {/* Main Content Area */}
             <Box

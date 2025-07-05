@@ -10,7 +10,7 @@ import {
     LinearProgress,
     Chip
 } from '@mui/material';
-import { Email, ArrowForward } from '@mui/icons-material';
+import { ArrowForward } from '@mui/icons-material'; // Removed Email
 import { ParsedEmail } from '../utils/types';
 
 interface EmailInputPageProps {
@@ -48,38 +48,14 @@ const EmailInputPage: React.FC<EmailInputPageProps> = ({
     };
 
     return (
-        <Container maxWidth="md" sx={{ py: 4 }}>
+        // Container and Paper are kept, but the specific header Box is removed.
+        // The sx prop for py: 4 on Container can be removed if App.tsx's content Box padding is sufficient.
+        // For now, let's keep it to maintain some top/bottom spacing for the Paper element.
+        <Container maxWidth="md" sx={{ pt: 0, pb: 4 }}>
             <Paper elevation={3} sx={{ p: 4 }}>
-                <Box
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        mb: 2,
-                        pb: 1
-                    }}
-                >
-                    <Email sx={{ mr: 2, fontSize: 32, color: 'primary.main' }} />
-                    <Typography variant="h4" component="h1" sx={{ color: 'primary.main' }}>
-                        Money Stuff Reader
-                    </Typography>
-                    <Typography
-                        variant="caption"
-                        sx={{ color: 'text.secondary', ml: 1 }}
-                        component="span"
-                    >
-                        by{' '}
-                        <a
-                            href="https://bojanbaros.com"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 500 }}
-                        >
-                            Bojan Baros
-                        </a>
-                    </Typography>
-                </Box>
+                {/* The Box with Email icon, Title, and Byline has been moved to App.tsx */}
 
-                <Typography variant="h6" gutterBottom>
+                <Typography variant="h6" gutterBottom sx={{mt: 2}}> {/* Added margin top for spacing */}
                     Money Stuff Email Reader
                 </Typography>
 
