@@ -121,14 +121,26 @@ function App() {
                 backgroundColor: 'background.default',
                 color: 'text.primary', // Ensure text color contrasts with background
                 display: 'flex',
-                flexDirection: 'column'
+                flexDirection: 'column',
+                alignItems: 'center', // Center the main content panel
             }}>
-                <Box sx={{ alignSelf: 'flex-end', p: 1 }}>
-                    <IconButton sx={{ ml: 1 }} onClick={colorMode.toggleColorMode} color="inherit">
-                        {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-                    </IconButton>
-                </Box>
-                <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                {/* Main content panel */}
+                <Box sx={{
+                    flexGrow: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    width: '100%', // Ensure the panel takes full width for centering content
+                    maxWidth: '960px', // Max width for the content area
+                    p: 2, // Padding around the content area
+                    position: 'relative', // For positioning the theme toggle
+                }}>
+                    {/* Theme toggle button positioned inside the main panel */}
+                    <Box sx={{ position: 'absolute', top: 16, right: 16, zIndex: 1 }}>
+                        <IconButton sx={{ ml: 1 }} onClick={colorMode.toggleColorMode} color="inherit">
+                            {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+                        </IconButton>
+                    </Box>
+
                     {currentPage === 'input' ? (
                         <EmailInputPage
                             onEmailParsed={handleEmailParsed}
