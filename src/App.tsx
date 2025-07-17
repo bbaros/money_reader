@@ -66,7 +66,6 @@ function App() {
 
     const theme = useMemo(() => getCustomTheme(mode), [mode]);
 
-    const [currentPage, setCurrentPage] = useState<'input' | 'reader'>('input');
     const {
         parsedEmail,
         isLoading,
@@ -77,13 +76,17 @@ function App() {
         setActiveFootnote
     } = useEmailData();
 
+    const currentPage = parsedEmail ? 'reader' : 'input';
+
     const handleEmailParsed = () => {
-        setCurrentPage('reader');
+        // This function is called after parsing is successful.
+        // The page will automatically switch to 'reader' because `parsedEmail` will be set.
+        // We can use this to update any internal state if needed, but for now, it's okay.
     };
 
     const handleBackToInput = () => {
-        setCurrentPage('input');
         clearEmailData();
+        // This will cause `parsedEmail` to become null, automatically switching the page to 'input'.
     };
 
     // Updated to match the new signature in EmailMainContent and to handle closing via Popover

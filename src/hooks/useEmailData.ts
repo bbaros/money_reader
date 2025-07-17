@@ -1,16 +1,52 @@
-import { useState, useCallback } from 'react';
-import { EmailParserState } from '../utils/types';
+import { useState, useCallback, useEffect } from 'react';
+import { EmailParserState, ParsedEmail } from '../utils/types';
 import { parseMatthewLevineEmail, EmailParseError } from '../utils/emailParser';
 
+const LOCAL_STORAGE_KEY = 'moneyStuffReaderState';
+
+interface StoredState {
+    rawHtml: string;
+    parsedEmail: ParsedEmail | null;
+}
+
 export const useEmailData = () => {
-    const [state, setState] = useState<EmailParserState>({
-        rawHtml: '',
-        parsedEmail: null,
-        isLoading: false,
-        error: null
+    const [state, setState] = useState<EmailParserState>(() => {
+        try {
+            const storedItem = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (storedItem) {
+                const storedState: StoredState = JSON.parse(storedItem);
+                return {
+                    ...storedState,
+                    isLoading: false,
+                    error: null,
+                };
+            }
+        } catch (error) {
+            console.error("Failed to parse state from localStorage", error);
+            // If parsing fails, fall back to the default state
+        }
+        return {
+            rawHtml: '',
+            parsedEmail: null,
+            isLoading: false,
+            error: null,
+        };
     });
 
     const [activeFootnoteId, setActiveFootnoteId] = useState<number | null>(null);
+
+    // Effect to save state to localStorage whenever it changes
+    useEffect(() => {
+        try {
+            const stateToStore: StoredState = {
+                rawHtml: state.rawHtml,
+                parsedEmail: state.parsedEmail,
+            };
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stateToStore));
+        } catch (error) {
+            console.error("Failed to save state to localStorage", error);
+        }
+    }, [state.rawHtml, state.parsedEmail]);
 
     const parseEmail = useCallback(async (htmlContent: string) => {
         setState(prev => ({
