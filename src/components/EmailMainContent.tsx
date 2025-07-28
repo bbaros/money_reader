@@ -186,11 +186,11 @@ const EmailMainContent: React.FC<EmailMainContentProps> = ({
                     onClose={handlePopoverClose}
                     anchorOrigin={{
                         vertical: 'bottom',
-                        horizontal: 'left',
+                        horizontal: 'center',
                     }}
                     transformOrigin={{
                         vertical: 'top',
-                        horizontal: 'left',
+                        horizontal: 'center',
                     }}
                     PaperProps={{
                         sx: {
@@ -199,6 +199,7 @@ const EmailMainContent: React.FC<EmailMainContentProps> = ({
                             border: '1px solid',
                             borderColor: 'primary.main',
                             boxShadow: 3,
+                            zIndex: 9999,
                         }
                     }}
                 >
