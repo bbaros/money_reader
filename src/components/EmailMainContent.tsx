@@ -202,8 +202,8 @@ const EmailMainContent: React.FC<EmailMainContentProps> = ({
                         }
                     }}
                     style={{
-                        top: 'auto',
-                        left: 'auto',
+                        top: 'auto !important',
+                        left: 'auto !important',
                     }}
                 >
                     <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 1 }}>
