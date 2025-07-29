@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 
+test.use({ viewport: { width: 1920, height: 1080 } });
 test('take screenshot', async ({ page }) => {
   test.setTimeout(60000);
   await page.goto('http://localhost:5173');
