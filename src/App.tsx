@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Box, IconButton, PaletteMode, Typography, Button } from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
@@ -9,7 +9,14 @@ import { EmailInputPage, EmailReaderPage } from './components';
 import { useEmailData } from './hooks/useEmailData';
 
 function App() {
-    const [mode, setMode] = useState<PaletteMode>('light');
+    const [mode, setMode] = useState<PaletteMode>(() => {
+        const savedMode = localStorage.getItem('themeMode');
+        return (savedMode === 'dark' || savedMode === 'light') ? savedMode : 'light';
+    });
+
+    useEffect(() => {
+        localStorage.setItem('themeMode', mode);
+    }, [mode]);
     const colorMode = useMemo(
         () => ({
             toggleColorMode: () => {
