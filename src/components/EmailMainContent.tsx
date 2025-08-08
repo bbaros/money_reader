@@ -195,15 +195,12 @@ const EmailMainContent: React.FC<EmailMainContentProps> = ({
                     PaperProps={{
                         sx: {
                             p: 2,
-                            maxWidth: 350,
                             border: '1px solid',
                             borderColor: 'primary.main',
                             boxShadow: 3,
+                            minWidth: '70vw',
+                            maxWidth: '90vw',
                         }
-                    }}
-                    style={{
-                        top: popoverAnchorEl ? `${popoverAnchorEl.getBoundingClientRect().bottom + window.scrollY}px` : 'auto',
-                        left: popoverAnchorEl ? `${popoverAnchorEl.getBoundingClientRect().left + window.scrollX}px` : 'auto',
                     }}
                 >
                     <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 1 }}>
