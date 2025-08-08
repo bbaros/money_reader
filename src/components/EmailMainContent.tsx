@@ -192,6 +192,7 @@ const EmailMainContent: React.FC<EmailMainContentProps> = ({
                         vertical: 'top',
                         horizontal: 'center',
                     }}
+                    // Increase the width of the footnote popover
                     PaperProps={{
                         sx: {
                             p: 2,
@@ -201,6 +202,10 @@ const EmailMainContent: React.FC<EmailMainContentProps> = ({
                             minWidth: '70vw',
                             maxWidth: '90vw',
                         }
+                    }}
+                    style={{
+                        top: popoverAnchorEl ? `${popoverAnchorEl.getBoundingClientRect().bottom + window.scrollY}px` : 'auto',
+                        left: popoverAnchorEl ? `${popoverAnchorEl.getBoundingClientRect().left + window.scrollX}px` : 'auto',
                     }}
                 >
                     <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 1 }}>
