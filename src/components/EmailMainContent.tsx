@@ -195,6 +195,7 @@ const EmailMainContent: React.FC<EmailMainContentProps> = ({
                     PaperProps={{
                         sx: {
                             p: 2,
+                            minWidth: '30vw',
                             maxWidth: 350,
                             border: '1px solid',
                             borderColor: 'primary.main',
