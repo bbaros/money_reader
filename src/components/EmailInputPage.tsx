@@ -10,7 +10,7 @@ import {
     LinearProgress,
     Chip
 } from '@mui/material';
-import { ArrowForward } from '@mui/icons-material'; // Removed Email
+import { ArrowForward, ContentPaste } from '@mui/icons-material'; // Removed Email
 import { ParsedEmail } from '../utils/types';
 
 interface EmailInputPageProps {
@@ -38,6 +38,44 @@ const EmailInputPage: React.FC<EmailInputPageProps> = ({
             onEmailParsed(parsedEmail);
         } catch (err) {
             // Error is handled by the hook
+        }
+    };
+
+    const handlePasteFromClipboard = async () => {
+        try {
+            // navigator.clipboard.read() allows accessing different mime types like text/html.
+            // We'll try to use it if available to preserve formatting.
+            if (navigator.clipboard && navigator.clipboard.read) {
+                const clipboardItems = await navigator.clipboard.read();
+                for (const item of clipboardItems) {
+                    if (item.types.includes('text/html')) {
+                        const blob = await item.getType('text/html');
+                        const text = await blob.text();
+                        setEmailContent(text);
+                        return;
+                    }
+                    if (item.types.includes('text/plain')) {
+                        const blob = await item.getType('text/plain');
+                        const text = await blob.text();
+                        setEmailContent(text);
+                        return;
+                    }
+                }
+            }
+
+            // Fallback to readText
+            const text = await navigator.clipboard.readText();
+            setEmailContent(text);
+
+        } catch (err) {
+            console.error('Failed to paste from clipboard:', err);
+            // In case read() failed or permission denied, try readText as a backup.
+            try {
+                const text = await navigator.clipboard.readText();
+                setEmailContent(text);
+            } catch (readTextErr) {
+                console.error('Failed to read clipboard text:', readTextErr);
+            }
         }
     };
 
@@ -92,6 +130,17 @@ const EmailInputPage: React.FC<EmailInputPageProps> = ({
                         {error}
                     </Alert>
                 )}
+
+                <Box display="flex" justifyContent="flex-end" mb={1}>
+                    <Button
+                        startIcon={<ContentPaste />}
+                        onClick={handlePasteFromClipboard}
+                        size="small"
+                        disabled={isLoading}
+                    >
+                        Paste from Clipboard
+                    </Button>
+                </Box>
 
                 <TextField
                     fullWidth
