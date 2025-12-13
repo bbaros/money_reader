@@ -10,7 +10,7 @@ import {
     LinearProgress,
     Chip
 } from '@mui/material';
-import { ArrowForward } from '@mui/icons-material'; // Removed Email
+import { ArrowForward, ContentPaste } from '@mui/icons-material'; // Removed Email
 import { ParsedEmail } from '../utils/types';
 
 interface EmailInputPageProps {
@@ -28,16 +28,60 @@ const EmailInputPage: React.FC<EmailInputPageProps> = ({
 }) => {
     const [emailContent, setEmailContent] = useState('');
 
-    const handleParseEmail = async () => {
-        if (!emailContent.trim()) {
+    const handleParseEmail = async (contentOverride?: string) => {
+        const contentToParse = typeof contentOverride === 'string' ? contentOverride : emailContent;
+
+        if (!contentToParse.trim()) {
             return;
         }
 
         try {
-            const parsedEmail = await onParseEmail(emailContent);
+            const parsedEmail = await onParseEmail(contentToParse);
             onEmailParsed(parsedEmail);
         } catch (err) {
             // Error is handled by the hook
+        }
+    };
+
+    const handlePasteAndParse = async () => {
+        let text = '';
+        try {
+            // navigator.clipboard.read() allows accessing different mime types like text/html.
+            // We'll try to use it if available to preserve formatting.
+            if (navigator.clipboard && navigator.clipboard.read) {
+                const clipboardItems = await navigator.clipboard.read();
+                for (const item of clipboardItems) {
+                    if (item.types.includes('text/html')) {
+                        const blob = await item.getType('text/html');
+                        text = await blob.text();
+                        break;
+                    }
+                    if (item.types.includes('text/plain')) {
+                        const blob = await item.getType('text/plain');
+                        text = await blob.text();
+                        break;
+                    }
+                }
+            }
+
+            if (!text) {
+                // Fallback to readText
+                text = await navigator.clipboard.readText();
+            }
+
+        } catch (err) {
+            console.error('Failed to paste from clipboard:', err);
+            // In case read() failed or permission denied, try readText as a backup.
+            try {
+                text = await navigator.clipboard.readText();
+            } catch (readTextErr) {
+                console.error('Failed to read clipboard text:', readTextErr);
+            }
+        }
+
+        if (text) {
+            setEmailContent(text);
+            handleParseEmail(text);
         }
     };
 
@@ -117,15 +161,26 @@ const EmailInputPage: React.FC<EmailInputPageProps> = ({
                         {emailContent.length} characters
                     </Typography>
 
-                    <Button
-                        variant="contained"
-                        size="large"
-                        onClick={handleParseEmail}
-                        disabled={!emailContent.trim() || isLoading}
-                        endIcon={<ArrowForward />}
-                    >
-                        {isLoading ? 'Parsing...' : 'Parse Email'}
-                    </Button>
+                    <Box display="flex" gap={2}>
+                        <Button
+                            startIcon={<ContentPaste />}
+                            onClick={handlePasteAndParse}
+                            size="large"
+                            disabled={isLoading}
+                            variant="outlined"
+                        >
+                            Paste & Parse
+                        </Button>
+                        <Button
+                            variant="contained"
+                            size="large"
+                            onClick={() => handleParseEmail()}
+                            disabled={!emailContent.trim() || isLoading}
+                            endIcon={<ArrowForward />}
+                        >
+                            {isLoading ? 'Parsing...' : 'Parse Email'}
+                        </Button>
+                    </Box>
                 </Box>
 
                 <Box mt={3}>
