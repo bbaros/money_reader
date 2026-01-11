@@ -37,6 +37,21 @@ function convertHtmlToDisplayHtml(html: string): string {
     return cleanHtml;
 }
 
+function extractNewsletterBody(html: string): string {
+    // Check if we are in a DOM environment
+    if (typeof document !== 'undefined') {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        // Look for the specific table structure used by Bloomberg/Money Stuff
+        // The id pattern seems to be consistently 'm_...wrapper' or ending in 'wrapper'
+        const wrapperTable = tempDiv.querySelector('table[id$="wrapper"]');
+        if (wrapperTable) {
+            return wrapperTable.outerHTML;
+        }
+    }
+    return html;
+}
+
 export const parseMatthewLevineEmail = (htmlContent: string): ParsedEmail => {
     if (!htmlContent || htmlContent.trim().length === 0) {
         throw new EmailParseError('Email content is empty');
@@ -45,6 +60,12 @@ export const parseMatthewLevineEmail = (htmlContent: string): ParsedEmail => {
     // Detect if content is HTML
     const isHtml = /<[a-z][\s\S]*>/i.test(htmlContent);
 
+    // Clean wrapper if present (only for HTML)
+    let contentToProcess = htmlContent;
+    if (isHtml) {
+        contentToProcess = extractNewsletterBody(htmlContent);
+    }
+
     // For HTML content, we need to be smarter about delimiter detection
     let delimiterMatch = -1;
     let mainContent = '';
@@ -52,13 +73,13 @@ export const parseMatthewLevineEmail = (htmlContent: string): ParsedEmail => {
 
     if (isHtml) {
         // Strip HTML to find the delimiter in text content
-        const textContent = stripHtmlTags(htmlContent);
+        const textContent = stripHtmlTags(contentToProcess);
         const delimiter = /If you'd like to get Money Stuff/i;
         const textDelimiterMatch = textContent.search(delimiter);
 
         if (textDelimiterMatch === -1) {
             // Fallback: try to parse generic footnotes
-            return parseGenericFootnotes(htmlContent);
+            return parseGenericFootnotes(contentToProcess);
         }
 
         // Find the delimiter phrase in the original HTML
@@ -67,17 +88,17 @@ export const parseMatthewLevineEmail = (htmlContent: string): ParsedEmail => {
         const delimiterWords = delimiterText.split(/\s+/).slice(0, 6).join('\\s+'); // First 6 words
         const htmlDelimiterPattern = new RegExp(delimiterWords.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
 
-        delimiterMatch = htmlContent.search(htmlDelimiterPattern);
+        delimiterMatch = contentToProcess.search(htmlDelimiterPattern);
 
         if (delimiterMatch === -1) {
             // Fallback: try to find the delimiter using a more flexible approach
             const simpleDelimiter = /If you'd like to get Money Stuff/i;
-            delimiterMatch = htmlContent.search(simpleDelimiter);
+            delimiterMatch = contentToProcess.search(simpleDelimiter);
         }
 
         if (delimiterMatch !== -1) {
-            mainContent = htmlContent.substring(0, delimiterMatch).trim();
-            footnotesSection = htmlContent.substring(delimiterMatch).trim();
+            mainContent = contentToProcess.substring(0, delimiterMatch).trim();
+            footnotesSection = contentToProcess.substring(delimiterMatch).trim();
 
             // Convert for display while preserving structure
             mainContent = convertHtmlToDisplayHtml(mainContent);
@@ -89,15 +110,15 @@ export const parseMatthewLevineEmail = (htmlContent: string): ParsedEmail => {
     } else {
         // For plain text, use the original logic
         const delimiter = /If you'd like to get Money Stuff/i;
-        delimiterMatch = htmlContent.search(delimiter);
+        delimiterMatch = contentToProcess.search(delimiter);
 
         if (delimiterMatch === -1) {
             // Fallback: try to parse generic footnotes
-            return parseGenericFootnotes(htmlContent);
+            return parseGenericFootnotes(contentToProcess);
         }
 
-        mainContent = htmlContent.substring(0, delimiterMatch).trim();
-        footnotesSection = htmlContent.substring(delimiterMatch).trim();
+        mainContent = contentToProcess.substring(0, delimiterMatch).trim();
+        footnotesSection = contentToProcess.substring(delimiterMatch).trim();
     }
 
     // Extract footnotes from the footnotes section
