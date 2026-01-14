@@ -8,10 +8,16 @@ import {
     Box,
     Alert,
     LinearProgress,
-    Chip
+    Chip,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions
 } from '@mui/material';
 import { ArrowForward, ContentPaste } from '@mui/icons-material'; // Removed Email
 import { ParsedEmail } from '../utils/types';
+import { findFootnoteReferences, parseMatthewLevineEmail } from '../utils/emailParser';
 
 interface EmailInputPageProps {
     onEmailParsed: (parsedEmail: ParsedEmail) => void;
@@ -27,6 +33,17 @@ const EmailInputPage: React.FC<EmailInputPageProps> = ({
     onParseEmail
 }) => {
     const [emailContent, setEmailContent] = useState('');
+    const [showWarning, setShowWarning] = useState(false);
+    const [pendingContent, setPendingContent] = useState<string | null>(null);
+
+    const callOnParseEmailSafe = async (content: string) => {
+        try {
+            const parsedEmail = await onParseEmail(content);
+            onEmailParsed(parsedEmail);
+        } catch (err) {
+            // Error is handled by the hook
+        }
+    };
 
     const handleParseEmail = async (contentOverride?: string) => {
         const contentToParse = typeof contentOverride === 'string' ? contentOverride : emailContent;
@@ -36,11 +53,40 @@ const EmailInputPage: React.FC<EmailInputPageProps> = ({
         }
 
         try {
-            const parsedEmail = await onParseEmail(contentToParse);
-            onEmailParsed(parsedEmail);
+            // Local parse to check for warning without updating global state
+            const localParsed = parseMatthewLevineEmail(contentToParse);
+
+            // Check for missing footnotes
+            const references = findFootnoteReferences(localParsed.mainContent);
+            const footnoteIds = localParsed.footnotes.map(f => f.id);
+
+            // Detect if we have references but missing definitions
+            const missingDefinitions = references.filter(id => !footnoteIds.includes(id));
+
+            // Trigger warning if we have references but significantly missing footnotes
+            if (references.length > 0 && missingDefinitions.length > 0) {
+                setPendingContent(contentToParse);
+                setShowWarning(true);
+                return; // Stop and wait for user confirmation
+            }
         } catch (err) {
-            // Error is handled by the hook
+            // If local parse fails (e.g. invalid format), let the main handler try and set the error state
         }
+
+        // If no warning needed or local parse failed, proceed
+        await callOnParseEmailSafe(contentToParse);
+    };
+
+    const handleContinueParsing = () => {
+        if (pendingContent) {
+            callOnParseEmailSafe(pendingContent);
+        }
+        handleCloseWarning();
+    };
+
+    const handleCloseWarning = () => {
+        setShowWarning(false);
+        setPendingContent(null);
     };
 
     const handlePasteAndParse = async () => {
@@ -190,6 +236,34 @@ const EmailInputPage: React.FC<EmailInputPageProps> = ({
                     </Typography>
                 </Box>
             </Paper>
+
+            <Dialog
+                open={showWarning}
+                onClose={handleCloseWarning}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {"Warning: Missing Footnotes"}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        It looks like the text you pasted contains footnote references (e.g., [1]), but the footnotes themselves are missing.
+                        <br /><br />
+                        This usually happens if the email text was cut off by your email client (e.g., "Message clipped", "View entire message").
+                        <br /><br />
+                        You can continue with the partial content, or go back to copy the full email text.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseWarning} color="inherit">
+                        Back
+                    </Button>
+                    <Button onClick={handleContinueParsing} variant="contained" autoFocus>
+                        Continue Anyway
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Container>
     );
 };
