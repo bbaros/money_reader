@@ -89,6 +89,11 @@ const EmailInputPage: React.FC<EmailInputPageProps> = ({
         setPendingContent(null);
     };
 
+    const handleBackFromWarning = () => {
+        setEmailContent('');
+        handleCloseWarning();
+    };
+
     const handlePasteAndParse = async () => {
         let text = '';
         try {
@@ -256,7 +261,7 @@ const EmailInputPage: React.FC<EmailInputPageProps> = ({
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCloseWarning} color="inherit">
+                    <Button onClick={handleBackFromWarning} color="inherit">
                         Back
                     </Button>
                     <Button onClick={handleContinueParsing} variant="contained" autoFocus>
