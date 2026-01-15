@@ -14,7 +14,7 @@ A React application that helps users read Matt Levine's "Money Stuff" emails by 
 *   **Pop-over Footnotes**: Displays footnotes in a pop-over when the corresponding reference in the main text is clicked.
 *   **Interactive Footnote System**: Clickable footnote references in the main text trigger a pop-over displaying the corresponding footnote content.
 *   **HTML Parsing**: Parses raw HTML from Matt Levine's "Money Stuff" emails to extract main content and footnotes.
-*   **Responsive Design**: Adapts to different screen sizes, stacking panes vertically on mobile devices for optimal viewing.
+*   **Responsive Design**: Adapts to different screen sizes for optimal viewing.
 *   **MUI Components**: Utilizes Material-UI for a clean and modern user interface.
 
 ## Technology Stack
