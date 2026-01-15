@@ -1,7 +1,7 @@
 # Matt Levine Email Reader - Architecture Plan
 
 ## Overview
-A React application that helps users read Matt Levine's "Money Stuff" emails by providing a two-pane layout with main content on top and footnotes on the bottom, both scrollable independently.
+A React application that helps users read Matt Levine's "Money Stuff" emails by providing main content with pop-over footnotes.
 
 ## Technology Stack
 - **Frontend**: Vite + React 18 + TypeScript
@@ -15,9 +15,9 @@ graph TD
     A[Landing Page] --> B[Paste Email HTML]
     B --> C[Click Parse Button]
     C --> D{Email Parsing}
-    D --> E[Two-Pane Reader View]
+    D --> E[Reader View]
     E --> F[Click Footnote Reference]
-    F --> G[Auto-scroll & Highlight Footnote]
+    F --> G[Show Footnote Popover]
     G --> E
     E --> H[Back to Landing Page]
 ```
@@ -33,14 +33,11 @@ graph TD
     B --> F[Instructions]
     
     C --> G[EmailMainContent]
-    C --> H[FootnotesPanel]
     C --> I[BackButton]
     
     G --> J[ProcessedEmailContent]
     G --> K[FootnoteReferences]
-    
-    H --> L[FootnotesList]
-    H --> M[HighlightedFootnote]
+    G --> L[Popover]
 ```
 
 ## Key Features & Implementation Details
@@ -56,21 +53,20 @@ graph TD
   - Parse individual footnotes with their numbers from the footnotes section
 - **Output**: Structured data with main content and footnotes array
 
-### 2. Two-Pane Layout
-- **Top Pane (60% height)**: Main email content with clickable footnote references
-- **Bottom Pane (40% height)**: Footnotes list with independent scrolling
-- **Responsive**: Stack vertically on mobile devices
-- **Divider**: Visual separation between panes
+### 2. Popover Footnotes
+- **Implementation**: Uses Material-UI `Popover` component
+- **Behavior**: Displays footnote content near the clicked reference
+- **Interaction**: Click outside to dismiss
 
 ### 3. Interactive Footnote System
 - **Clickable References**: `[1]`, `[2]` etc. become clickable buttons in main content
-- **Auto-scroll**: Clicking reference scrolls corresponding footnote into view in bottom pane
-- **Highlighting**: Active footnote gets highlighted background
-- **Smooth Animations**: CSS transitions for scroll and highlight effects
+- **Popover**: Clicking reference opens a popover displaying the footnote content
+- **Highlighting**: Active footnote reference gets highlighted
+- **Smooth Animations**: CSS transitions for highlight effects
 
 ### 4. UI/UX Components
 - **Landing Page**: Clean input form with instructions
-- **Reader Page**: Two-pane layout with navigation controls
+- **Reader Page**: Single pane layout with main content
 - **Loading States**: Progress indicators during parsing
 - **Error Handling**: User-friendly messages for parsing failures
 
@@ -82,7 +78,6 @@ mattreader/
 │   │   ├── EmailInputPage.tsx
 │   │   ├── EmailReaderPage.tsx
 │   │   ├── EmailMainContent.tsx
-│   │   ├── FootnotesPanel.tsx
 │   │   └── index.ts
 │   ├── utils/
 │   │   ├── emailParser.ts
@@ -156,9 +151,9 @@ If you'd like to get Money Stuff in handy email form, right in your inbox, pleas
 
 ### Phase 3: UI Components
 1. Build email input page with MUI components
-2. Create two-pane reader layout
+2. Create reader layout
 3. Implement footnote reference click handlers
-4. Add smooth scrolling and highlighting
+4. Implement Popover for footnotes
 
 ### Phase 4: Polish & Testing
 1. Add loading states and error boundaries
@@ -172,26 +167,23 @@ If you'd like to get Money Stuff in handy email form, right in your inbox, pleas
 - `Button`, `IconButton` for actions
 - `Typography` for text styling
 - `Divider` for section separation
-- `List`, `ListItem` for footnotes
-- `Chip` or `Badge` for footnote numbers
+- `Popover` for displaying footnotes
 - `LinearProgress` for loading states
 
 ## User Experience Flow
 1. **Landing Page**: User sees instructions and large text area for pasting email
 2. **Paste Email**: User pastes HTML email content from their email client
 3. **Parse**: User clicks "Parse Email" button
-4. **Reader View**: Two-pane layout appears with:
-   - Top: Main email content with clickable footnote references
-   - Bottom: Footnotes list, initially scrolled to top
+4. **Reader View**: Layout appears with:
+   - Main email content with clickable footnote references
 5. **Interaction**: User clicks footnote reference `[1]` in main content
-6. **Auto-scroll**: Bottom pane automatically scrolls to footnote [1] and highlights it
-7. **Continue Reading**: User can continue reading and clicking other footnote references
+6. **Show Popover**: Popover appears near the clicked reference with footnote content
+7. **Continue Reading**: User can click outside to close popover or click another footnote reference
 8. **Return**: User can go back to landing page to parse another email
 
 ## Technical Considerations
 - **Performance**: Use React.memo and useMemo for large email content
 - **Accessibility**: Proper ARIA labels and keyboard navigation
-- **Mobile**: Responsive design that stacks panes vertically on small screens
 - **Error Handling**: Graceful degradation if parsing fails
 - **TypeScript**: Strong typing throughout for better developer experience
 

@@ -45,10 +45,8 @@ This test validates:
 5. Verify:
    - ✅ Main content shows: "This is a test email with footnotes..."
    - ✅ Header shows "4 footnotes found"
-   - ✅ Footnotes panel shows "Footnotes (4)"
-   - ✅ Footnotes [6], [7], [8], [9] are displayed in the bottom panel
+   - ✅ Clicking footnote references [6], [7], [8], [9] displays their content in a popover
    - ✅ Main content does NOT contain footnote definitions
-   - ✅ Both panels can be scrolled independently
 
 ### Browser Console Test
 
@@ -80,6 +78,6 @@ This format includes:
 The parser should successfully:
 1. Separate main email content from footnotes
 2. Extract 4 footnotes (IDs: 6, 7, 8, 9)
-3. Display footnotes in the dedicated bottom panel
+3. Display footnotes in a popover when the reference is clicked
 4. Remove footnote definitions from main content
 5. Preserve footnote references [6], [7], etc. in main content
