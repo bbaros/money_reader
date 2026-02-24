@@ -10,13 +10,15 @@ interface EmailReaderPageProps {
     parsedEmail: ParsedEmail;
     activeFootnoteId: number | null;
     onFootnoteClick: (footnoteId: number, currentTarget: HTMLElement | null) => void; // Signature updated
+    fontSize: number;
     // onBackToInput: () => void; // Removed onBackToInput from props
 }
 
 const EmailReaderPage: React.FC<EmailReaderPageProps> = ({
     parsedEmail,
     activeFootnoteId,
-    onFootnoteClick
+    onFootnoteClick,
+    fontSize
     // onBackToInput // Removed from destructuring
 }) => {
     return (
@@ -46,6 +48,7 @@ const EmailReaderPage: React.FC<EmailReaderPageProps> = ({
                     parsedEmail={parsedEmail}
                     onFootnoteClick={onFootnoteClick} // Passed through with updated signature
                     activeFootnoteId={activeFootnoteId}
+                    fontSize={fontSize}
                 />
                 {/* FootnotesPanel and PanelGroup are removed */}
             </Box>

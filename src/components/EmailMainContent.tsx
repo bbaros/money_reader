@@ -6,6 +6,7 @@ interface EmailMainContentProps {
     parsedEmail: ParsedEmail;
     onFootnoteClick: (footnoteId: number, currentTarget: HTMLElement | null) => void; // Updated to include currentTarget
     activeFootnoteId: number | null;
+    fontSize: number;
     // popoverAnchorEl: HTMLElement | null; // Removed, will be managed internally
     // setPopoverAnchorEl: (element: HTMLElement | null) => void; // Removed
 }
@@ -13,7 +14,8 @@ interface EmailMainContentProps {
 const EmailMainContent: React.FC<EmailMainContentProps> = ({
     parsedEmail,
     onFootnoteClick,
-    activeFootnoteId
+    activeFootnoteId,
+    fontSize
 }) => {
     const [popoverAnchorEl, setPopoverAnchorEl] = useState<HTMLElement | null>(null);
 
@@ -161,7 +163,7 @@ const EmailMainContent: React.FC<EmailMainContentProps> = ({
                                 fontWeight: 'bold'
                             },
                             lineHeight: 1.7,
-                            fontSize: '1rem'
+                            fontSize: `${fontSize}px`
                         }}
                     />
                 ) : (
@@ -170,10 +172,10 @@ const EmailMainContent: React.FC<EmailMainContentProps> = ({
                             '& p': { mb: 2 },
                             '& h1, & h2, & h3, & h4, & h5, & h6': { mt: 3, mb: 2 },
                             lineHeight: 1.7,
-                            fontSize: '1rem'
+                            fontSize: `${fontSize}px`
                         }}
                     >
-                        <Typography component="div" sx={{ whiteSpace: 'pre-wrap' }}>
+                        <Typography component="div" sx={{ whiteSpace: 'pre-wrap', fontSize: 'inherit' }}>
                             {renderContentWithClickableFootnotes(parsedEmail.mainContent)}
                         </Typography>
                     </Box>
