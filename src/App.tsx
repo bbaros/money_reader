@@ -5,8 +5,11 @@ import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import EmailIcon from '@mui/icons-material/Email';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import { EmailInputPage, EmailReaderPage } from './components';
 import { useEmailData } from './hooks/useEmailData';
+import { useReaderSettings } from './hooks/useReaderSettings';
 
 function App() {
     const [mode, setMode] = useState<PaletteMode>(() => {
@@ -82,6 +85,12 @@ function App() {
         clearEmailData,
         setActiveFootnote
     } = useEmailData();
+
+    const {
+        fontSize,
+        increaseFontSize,
+        decreaseFontSize
+    } = useReaderSettings();
 
     const currentPage = parsedEmail ? 'reader' : 'input';
 
@@ -191,9 +200,17 @@ function App() {
                                 </>
                             )}
                         </Box>
-                        <IconButton sx={{ ml: 1 }} onClick={colorMode.toggleColorMode} color="inherit">
-                            {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-                        </IconButton>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <IconButton onClick={decreaseFontSize} color="inherit" aria-label="decrease font size">
+                                <ZoomOutIcon />
+                            </IconButton>
+                            <IconButton onClick={increaseFontSize} color="inherit" aria-label="increase font size">
+                                <ZoomInIcon />
+                            </IconButton>
+                            <IconButton sx={{ ml: 1 }} onClick={colorMode.toggleColorMode} color="inherit">
+                                {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+                            </IconButton>
+                        </Box>
                     </Box>
 
                     {/* Content Area */}
@@ -211,6 +228,7 @@ function App() {
                             parsedEmail={parsedEmail}
                             activeFootnoteId={activeFootnoteId}
                             onFootnoteClick={handleFootnoteClick}
+                            fontSize={fontSize}
                             // onBackToInput={handleBackToInput} // Removed prop
                         />
                     )
