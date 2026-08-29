@@ -28,7 +28,7 @@ jobs:
         run: npm ci
 
       - name: Build application
-        run: npm run build # This will use base: '/matt_reader/' from vite.config.ts
+        run: npm run build # This will use base: '/money_reader/' from vite.config.ts
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
