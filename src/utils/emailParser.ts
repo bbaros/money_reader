@@ -28,7 +28,7 @@ function convertHtmlToDisplayHtml(html: string): string {
     // Normalize linked footnote references, including Gmail-prefixed anchors.
     cleanHtml = cleanHtml.replace(
         /<a\b([^>]*?)href\s*=\s*(["'])[^"']*footnote[-_]?\d+[^"']*\2([^>]*)>(.*?)<\/a>/gi,
-        (match, beforeHref, quote, afterHref, linkText) => {
+        (match, beforeHref, _quote, afterHref, linkText) => {
             const href = match.match(/href\s*=\s*(["'])[^"']*footnote[-_]?\d+[^"']*\1/i)?.[0] || '';
             const id = href.match(/footnote[-_]?(\d+)/i)?.[1];
             if (!id) return match;
@@ -82,7 +82,7 @@ const subscriptionDelimiter = /If\s+you(?:’|&#8217;|&rsquo;|'|&#39;)d\s+like\s
 
 /** Locate a keyed footnote or a paragraph/div whose text begins with a numbered note. */
 function findFirstFootnoteMatch(html: string): number {
-    const footnoteDefinition = /<(?:div\b[^>]*\bid\s*=\s*["'][^"']*footnote[-_]??\d+|a\b[^>]*\bname\s*=\s*["'][^"']*footnote[-_]??\d+|(?:p|div)\b[^>]*>\s*(?:(?:<[^>]*>)\s*)*\[\d+\]\s+)/i;
+    const footnoteDefinition = /<(?:div\b[^>]*\bid\s*=\s*["'][^"']*footnote[-_]?\d+|a\b[^>]*\bname\s*=\s*["'][^"']*footnote[-_]?\d+|(?:p|div)\b[^>]*>\s*(?:(?:<[^>]*>)\s*)*\[\d+\]\s+)/i;
     return html.search(footnoteDefinition);
 }
 
