@@ -26,7 +26,7 @@ function convertHtmlToDisplayHtml(html: string): string {
     cleanHtml = cleanHtml.replace(/<o:p[^>]*>.*?<\/o:p>/gi, '');
     cleanHtml = cleanHtml.replace(/<span[^>]*><\/span>/gi, '');
 
-    // Convert footnote links to internal app links, including Bloomberg's #footnote-1 links.
+    // Convert footnote links to internal app links, including Gmail-prefixed anchors.
     cleanHtml = cleanHtml.replace(
         /<a[^>]*href\s*=\s*["'][^"']*footnote[_-]?(\d+)[^"']*["'][^>]*>(.*?)<\/a>/gi,
         (_match, footnoteNum, linkText) =>
@@ -130,36 +130,38 @@ export const parseMatthewLevineEmail = (htmlContent: string): ParsedEmail => {
 };
 
 const parseGenericFootnotes = (htmlContent: string): ParsedEmail => {
-    const footnotesSeparators = [
-        /<h[1-6][^>]*>footnotes?<\/h[1-6]>/i,
-        /footnotes?:/i,
-        /<p[^>]*id\s*=\s*["']?footnote/i
-    ];
-
-    let separatorMatch = -1;
-    let separatorLength = 0;
-    for (const separator of footnotesSeparators) {
-        const match = htmlContent.search(separator);
-        if (match !== -1) {
-            separatorMatch = match;
-            separatorLength = htmlContent.match(separator)?.[0].length ?? 0;
-            break;
-        }
-    }
+    // Prefer actual footnote definitions over generic separators (which may occur in article text).
+    const firstFootnoteMatch = htmlContent.search(
+        /<(?:div\b[^>]*\bid\s*=\s*["'][^"']*footnote[-_]?\d+|a\b[^>]*\bname\s*=\s*["'][^"']*footnote[-_]?\d+)/i
+    );
 
     let mainContent = '';
     let footnotesSection = '';
-    if (separatorMatch !== -1) {
-        mainContent = htmlContent.substring(0, separatorMatch).trim();
-        footnotesSection = htmlContent.substring(separatorMatch + separatorLength).trim();
-    } else {
-        const firstFootnoteMatch = htmlContent.search(
-            /<(?:div\b[^>]*\bid\s*=\s*["'][^"']*footnote-\d+|a\b[^>]*\bname\s*=\s*["'][^"']*footnote-\d+)/i
-        );
 
-        if (firstFootnoteMatch !== -1) {
-            mainContent = htmlContent.substring(0, firstFootnoteMatch).trim();
-            footnotesSection = htmlContent.substring(firstFootnoteMatch).trim();
+    if (firstFootnoteMatch !== -1) {
+        mainContent = htmlContent.substring(0, firstFootnoteMatch).trim();
+        footnotesSection = htmlContent.substring(firstFootnoteMatch).trim();
+    } else {
+        const footnotesSeparators = [
+            /<h[1-6][^>]*>footnotes?<\/h[1-6]>/i,
+            /footnotes?:/i,
+            /<p[^>]*id\s*=\s*["']?footnote/i
+        ];
+
+        let separatorMatch = -1;
+        let separatorLength = 0;
+        for (const separator of footnotesSeparators) {
+            const match = htmlContent.search(separator);
+            if (match !== -1) {
+                separatorMatch = match;
+                separatorLength = htmlContent.match(separator)?.[0].length ?? 0;
+                break;
+            }
+        }
+
+        if (separatorMatch !== -1) {
+            mainContent = htmlContent.substring(0, separatorMatch).trim();
+            footnotesSection = htmlContent.substring(separatorMatch + separatorLength).trim();
         } else {
             mainContent = htmlContent;
         }
@@ -182,7 +184,7 @@ function extractBloombergFootnotes(footnotesSection: string): Footnote[] {
     const foundIds = new Set<number>();
 
     const addFootnote = (idValue: string, htmlContent: string) => {
-        const idMatch = idValue.match(/footnote-(\d+)/i);
+        const idMatch = idValue.match(/footnote[-_]?(\d+)/i);
         if (!idMatch) return;
 
         const id = parseInt(idMatch[1], 10);
@@ -193,14 +195,14 @@ function extractBloombergFootnotes(footnotesSection: string): Footnote[] {
         }
     };
 
-    tempDiv.querySelectorAll('div[id*="footnote-"]').forEach(div => {
+    tempDiv.querySelectorAll('div[id*="footnote"]').forEach(div => {
         addFootnote(div.id, div.innerHTML);
     });
 
-    tempDiv.querySelectorAll('a[name*="footnote-"]').forEach(anchor => {
+    tempDiv.querySelectorAll('a[name*="footnote"]').forEach(anchor => {
         // If the named anchor is inside a Bloomberg footnote div, that div was handled above.
-        if (anchor.closest('div[id*="footnote-"]')) return;
-        const container = anchor.parentElement;
+        if (anchor.closest('div[id*="footnote"]')) return;
+        const container = anchor.closest('p, div, li') || anchor.parentElement;
         if (container) addFootnote(anchor.getAttribute('name') || '', container.innerHTML);
     });
 

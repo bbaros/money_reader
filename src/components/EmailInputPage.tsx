@@ -56,24 +56,27 @@ const EmailInputPage: React.FC<EmailInputPageProps> = ({
             // Local parse to check for warning without updating global state
             const localParsed = parseMatthewLevineEmail(contentToParse);
 
-            // Check for missing footnotes
             const references = findFootnoteReferences(localParsed.mainContent);
             const footnoteIds = localParsed.footnotes.map(f => f.id);
-
-            // Detect if we have references but missing definitions
             const missingDefinitions = references.filter(id => !footnoteIds.includes(id));
+            const normalizedText = contentToParse.replace(/<[^>]*>/g, ' ');
+            const hasEmailEnding = /Follow\s+Us|You\s+received\s+this\s+message\s+because\s+you\s+are\s+subscribed\s+to\s+Bloomberg/i.test(normalizedText);
 
-            // Trigger warning if we have references but significantly missing footnotes
-            if (references.length > 0 && missingDefinitions.length > 0) {
+            // Do not block emails where footnote extraction found nothing, or whose Bloomberg footer confirms the copy reached the end.
+            if (
+                footnoteIds.length > 0 &&
+                references.length > 0 &&
+                missingDefinitions.length > 0 &&
+                !hasEmailEnding
+            ) {
                 setPendingContent(contentToParse);
                 setShowWarning(true);
-                return; // Stop and wait for user confirmation
+                return;
             }
         } catch (err) {
             // If local parse fails (e.g. invalid format), let the main handler try and set the error state
         }
 
-        // If no warning needed or local parse failed, proceed
         await callOnParseEmailSafe(contentToParse);
     };
 
@@ -150,7 +153,7 @@ const EmailInputPage: React.FC<EmailInputPageProps> = ({
             <Paper elevation={3} sx={{ p: 4 }}>
                 {/* The Box with Email icon, Title, and Byline has been moved to App.tsx */}
 
-                <Typography variant="h6" gutterBottom sx={{mt: 2}}> {/* Added margin top for spacing */}
+                <Typography variant="h6" gutterBottom sx={{mt: 2}}>
                     Money Stuff Email Reader
                 </Typography>
 
