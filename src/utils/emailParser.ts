@@ -18,7 +18,6 @@ function stripHtmlTags(html: string): string {
 }
 
 function convertHtmlToDisplayHtml(html: string): string {
-    // Keep essential HTML structure but clean up email-specific elements
     let cleanHtml = html;
 
     cleanHtml = cleanHtml.replace(/style\s*=\s*"[^"]*"/gi, '');
@@ -26,11 +25,27 @@ function convertHtmlToDisplayHtml(html: string): string {
     cleanHtml = cleanHtml.replace(/<o:p[^>]*>.*?<\/o:p>/gi, '');
     cleanHtml = cleanHtml.replace(/<span[^>]*><\/span>/gi, '');
 
-    // Convert footnote links to internal app links, including Gmail-prefixed anchors.
+    // Normalize linked footnote references, including Gmail-prefixed anchors.
     cleanHtml = cleanHtml.replace(
-        /<a[^>]*href\s*=\s*["'][^"']*footnote[_-]?(\d+)[^"']*["'][^>]*>(.*?)<\/a>/gi,
-        (_match, footnoteNum, linkText) =>
-            `<a href="#footnote-${footnoteNum}" class="footnote-link" data-footnote-id="${footnoteNum}">${linkText}</a>`
+        /<a\b([^>]*?)href\s*=\s*(["'])[^"']*footnote[-_]?\d+[^"']*\2([^>]*)>(.*?)<\/a>/gi,
+        (match, beforeHref, quote, afterHref, linkText) => {
+            const href = match.match(/href\s*=\s*(["'])[^"']*footnote[-_]?\d+[^"']*\1/i)?.[0] || '';
+            const id = href.match(/footnote[-_]?(\d+)/i)?.[1];
+            if (!id) return match;
+            return `<a${beforeHref}href="#footnote-${id}"${afterHref} class="footnote-link" data-footnote-id="${id}">${linkText}</a>`;
+        }
+    );
+
+    // Also link plain <sup>[1]</sup> references, without nesting existing anchors.
+    cleanHtml = cleanHtml.replace(
+        /<sup\b[^>]*>\s*\[(\d+)\]\s*<\/sup>/gi,
+        (match, id: string, offset: number, source: string) => {
+            const precedingHtml = source.slice(0, offset);
+            if (precedingHtml.lastIndexOf('<a') > precedingHtml.lastIndexOf('</a>')) {
+                return match;
+            }
+            return `<a href="#footnote-${id}" class="footnote-link" data-footnote-id="${id}">[${id}]</a>`;
+        }
     );
 
     return cleanHtml;
@@ -63,56 +78,58 @@ function removeEmailFooter(html: string): string {
         : html;
 }
 
+const subscriptionDelimiter = /If\s+you(?:’|&#8217;|&rsquo;|'|&#39;)d\s+like\s+to\s+get\s+Money\s+Stuff/i;
+
+/** Locate a keyed footnote or a paragraph/div whose text begins with a numbered note. */
+function findFirstFootnoteMatch(html: string): number {
+    const footnoteDefinition = /<(?:div\b[^>]*\bid\s*=\s*["'][^"']*footnote[-_]??\d+|a\b[^>]*\bname\s*=\s*["'][^"']*footnote[-_]??\d+|(?:p|div)\b[^>]*>\s*(?:(?:<[^>]*>)\s*)*\[\d+\]\s+)/i;
+    return html.search(footnoteDefinition);
+}
+
 export const parseMatthewLevineEmail = (htmlContent: string): ParsedEmail => {
     if (!htmlContent || htmlContent.trim().length === 0) {
         throw new EmailParseError('Email content is empty');
     }
 
     const isHtml = /<[a-z][\s\S]*>/i.test(htmlContent);
-    let contentToProcess = htmlContent;
-    if (isHtml) {
-        contentToProcess = extractNewsletterBody(htmlContent);
-    }
+    let contentToProcess = isHtml ? extractNewsletterBody(htmlContent) : htmlContent;
     contentToProcess = removeEmailFooter(contentToProcess);
 
-    let delimiterMatch = -1;
     let mainContent = '';
     let footnotesSection = '';
 
     if (isHtml) {
         const textContent = stripHtmlTags(contentToProcess);
-        const delimiter = /If you'd like to get Money Stuff/i;
-        const textDelimiterMatch = textContent.search(delimiter);
+        const textDelimiterMatch = textContent.search(subscriptionDelimiter);
+        let delimiterMatch = -1;
 
-        if (textDelimiterMatch === -1) {
+        if (textDelimiterMatch !== -1) {
+            const delimiterText = textContent.substring(textDelimiterMatch, textDelimiterMatch + 50);
+            const delimiterWords = delimiterText.split(/\s+/).slice(0, 6).join('\\s+');
+            const htmlDelimiterPattern = new RegExp(
+                delimiterWords.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+                'i'
+            );
+            delimiterMatch = contentToProcess.search(htmlDelimiterPattern);
+            if (delimiterMatch === -1) {
+                delimiterMatch = contentToProcess.search(subscriptionDelimiter);
+            }
+        }
+
+        const firstFootnoteMatch = findFirstFootnoteMatch(contentToProcess);
+        if (firstFootnoteMatch !== -1 && (delimiterMatch === -1 || firstFootnoteMatch < delimiterMatch)) {
+            mainContent = contentToProcess.substring(0, firstFootnoteMatch).trim();
+            footnotesSection = contentToProcess.substring(firstFootnoteMatch).trim();
+        } else if (delimiterMatch !== -1) {
+            mainContent = contentToProcess.substring(0, delimiterMatch).trim();
+            footnotesSection = contentToProcess.substring(delimiterMatch).trim();
+        } else {
             return parseGenericFootnotes(contentToProcess);
         }
 
-        const delimiterText = textContent.substring(textDelimiterMatch, textDelimiterMatch + 50);
-        const delimiterWords = delimiterText.split(/\s+/).slice(0, 6).join('\\s+');
-        const htmlDelimiterPattern = new RegExp(
-            delimiterWords.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
-            'i'
-        );
-
-        delimiterMatch = contentToProcess.search(htmlDelimiterPattern);
-        if (delimiterMatch === -1) {
-            delimiterMatch = contentToProcess.search(delimiter);
-        }
-
-        if (delimiterMatch !== -1) {
-            mainContent = contentToProcess.substring(0, delimiterMatch).trim();
-            footnotesSection = contentToProcess.substring(delimiterMatch).trim();
-            mainContent = convertHtmlToDisplayHtml(mainContent);
-        } else {
-            throw new EmailParseError(
-                'Could not locate the subscription section in the HTML content.'
-            );
-        }
+        mainContent = convertHtmlToDisplayHtml(mainContent);
     } else {
-        const delimiter = /If you'd like to get Money Stuff/i;
-        delimiterMatch = contentToProcess.search(delimiter);
-
+        const delimiterMatch = contentToProcess.search(subscriptionDelimiter);
         if (delimiterMatch === -1) {
             return parseGenericFootnotes(contentToProcess);
         }
@@ -130,11 +147,7 @@ export const parseMatthewLevineEmail = (htmlContent: string): ParsedEmail => {
 };
 
 const parseGenericFootnotes = (htmlContent: string): ParsedEmail => {
-    // Prefer actual footnote definitions over generic separators (which may occur in article text).
-    const firstFootnoteMatch = htmlContent.search(
-        /<(?:div\b[^>]*\bid\s*=\s*["'][^"']*footnote[-_]?\d+|a\b[^>]*\bname\s*=\s*["'][^"']*footnote[-_]?\d+)/i
-    );
-
+    const firstFootnoteMatch = findFirstFootnoteMatch(htmlContent);
     let mainContent = '';
     let footnotesSection = '';
 
@@ -172,7 +185,7 @@ const parseGenericFootnotes = (htmlContent: string): ParsedEmail => {
     return { mainContent, footnotes };
 };
 
-/** Extract Bloomberg footnotes from their containing divs, with named anchors as fallback. */
+/** Extract Bloomberg footnotes from ids, named anchors, and plain numbered paragraphs. */
 function extractBloombergFootnotes(footnotesSection: string): Footnote[] {
     if (!footnotesSection || typeof document === 'undefined') {
         return [];
@@ -184,7 +197,7 @@ function extractBloombergFootnotes(footnotesSection: string): Footnote[] {
     const foundIds = new Set<number>();
 
     const addFootnote = (idValue: string, htmlContent: string) => {
-        const idMatch = idValue.match(/footnote[-_]?(\d+)/i);
+        const idMatch = idValue.match(/footnote[-_]?(\d+)/i) || idValue.match(/^\[(\d+)\]/);
         if (!idMatch) return;
 
         const id = parseInt(idMatch[1], 10);
@@ -200,18 +213,25 @@ function extractBloombergFootnotes(footnotesSection: string): Footnote[] {
     });
 
     tempDiv.querySelectorAll('a[name*="footnote"]').forEach(anchor => {
-        // If the named anchor is inside a Bloomberg footnote div, that div was handled above.
         if (anchor.closest('div[id*="footnote"]')) return;
         const container = anchor.closest('p, div, li') || anchor.parentElement;
         if (container) addFootnote(anchor.getAttribute('name') || '', container.innerHTML);
     });
 
+    // Bloomberg's newer format has no identifying attributes; capture numbered note blocks.
+    tempDiv.querySelectorAll('p, div').forEach(element => {
+        const text = (element.textContent || '').trim();
+        const match = text.match(/^\[(\d+)\]\s+/);
+        if (match && !foundIds.has(parseInt(match[1], 10))) {
+            addFootnote(match[0], element.innerHTML);
+        }
+    });
+
     return footnotes.sort((a, b) => a.id - b.id);
 }
 
-const extractGenericFootnotes = (footnotesSection: string): Footnote[] => {
-    return extractBloombergFootnotes(footnotesSection);
-};
+const extractGenericFootnotes = (footnotesSection: string): Footnote[] =>
+    extractBloombergFootnotes(footnotesSection);
 
 const extractFootnotes = (footnotesSection: string, isHtml: boolean): Footnote[] => {
     if (isHtml) {
