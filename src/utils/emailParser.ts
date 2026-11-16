@@ -131,7 +131,6 @@ export const parseMatthewLevineEmail = (htmlContent: string): ParsedEmail => {
 
 const parseGenericFootnotes = (htmlContent: string): ParsedEmail => {
     const footnotesSeparators = [
-        /<hr[^>]*>/i,
         /<h[1-6][^>]*>footnotes?<\/h[1-6]>/i,
         /footnotes?:/i,
         /<p[^>]*id\s*=\s*["']?footnote/i
@@ -155,7 +154,7 @@ const parseGenericFootnotes = (htmlContent: string): ParsedEmail => {
         footnotesSection = htmlContent.substring(separatorMatch + separatorLength).trim();
     } else {
         const firstFootnoteMatch = htmlContent.search(
-            /<(?:div\b[^>]*\bid\s*=\s*["']footnote-\d+|a\b[^>]*\bname\s*=\s*["']footnote-\d+)/i
+            /<(?:div\b[^>]*\bid\s*=\s*["'][^"']*footnote-\d+|a\b[^>]*\bname\s*=\s*["'][^"']*footnote-\d+)/i
         );
 
         if (firstFootnoteMatch !== -1) {
@@ -194,13 +193,13 @@ function extractBloombergFootnotes(footnotesSection: string): Footnote[] {
         }
     };
 
-    tempDiv.querySelectorAll('div[id^="footnote-"]').forEach(div => {
+    tempDiv.querySelectorAll('div[id*="footnote-"]').forEach(div => {
         addFootnote(div.id, div.innerHTML);
     });
 
-    tempDiv.querySelectorAll('a[name^="footnote-"]').forEach(anchor => {
+    tempDiv.querySelectorAll('a[name*="footnote-"]').forEach(anchor => {
         // If the named anchor is inside a Bloomberg footnote div, that div was handled above.
-        if (anchor.closest('div[id^="footnote-"]')) return;
+        if (anchor.closest('div[id*="footnote-"]')) return;
         const container = anchor.parentElement;
         if (container) addFootnote(anchor.getAttribute('name') || '', container.innerHTML);
     });
